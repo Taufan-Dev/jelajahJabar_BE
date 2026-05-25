@@ -21,6 +21,16 @@ class WisatasTable
                     ->defaultImageUrl(url('images/placeholder-wisata.jpg')),
                 TextColumn::make('nama_wisata')
                     ->searchable(),
+                TextColumn::make('kategori')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Alam' => 'success',
+                        'Budaya' => 'warning',
+                        'Rekreasi' => 'info',
+                        'Edukasi' => 'danger',
+                        default => 'gray',
+                    })
+                    ->searchable(),
                 TextColumn::make('harga_tiket')
                     ->numeric()
                     ->sortable()

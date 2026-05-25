@@ -1,0 +1,655 @@
+{
+	"info": {
+		"_postman_id": "8b512c13-a417-48f8-8bb0-79882cd8d1ff",
+		"name": "Jelajah Jabar API Collection",
+		"description": "Koleksi API lengkap untuk Sistem Pemesanan Tiket & Rekomendasi Wisata Jawa Barat (Jelajah Jabar). Silakan sesuaikan variabel `base_url` ke URL Ngrok Anda.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Taufan Hidayatul Akbar\",\n    \"email\": \"taufan@gmail.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"taufan@gmail.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Katalog Wisata",
+			"item": [
+				{
+					"name": "Daftar Wisata (Rekomendasi)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wisata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata"
+							]
+						},
+						"description": "Mengambil seluruh data wisata yang sudah diapprove Super Admin, diurutkan berdasarkan formula rekomendasi (jumlah tiket terjual & rating)."
+					},
+					"response": []
+				},
+				{
+					"name": "Detail Wisata",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wisata/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tambah Wisata (Pengelola)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_wisata",
+									"value": "Kawah Putih Ciwidey",
+									"type": "text"
+								},
+								{
+									"key": "deskripsi",
+									"value": "Kawah vulkanik yang indah dengan air berwarna kehijauan.",
+									"type": "text"
+								},
+								{
+									"key": "lokasi",
+									"value": "Ciwidey, Kabupaten Bandung",
+									"type": "text"
+								},
+								{
+									"key": "harga_tiket",
+									"value": "35000",
+									"type": "text"
+								},
+								{
+									"key": "id_wilayah",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/wisata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Wisata (Pengelola)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_wisata",
+									"value": "Kawah Putih Ciwidey Updated",
+									"type": "text"
+								},
+								{
+									"key": "harga_tiket",
+									"value": "40000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/wisata/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata",
+								"1"
+							]
+						},
+						"description": "Menggunakan POST agar mempermudah upload file/gambar di PHP ketika mengupdate model."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Approval Wisata",
+			"item": [
+				{
+					"name": "Approve Admin Wilayah",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wisata/1/approve-admin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata",
+								"1",
+								"approve-admin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Super Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/wisata/1/approve-super",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"wisata",
+								"1",
+								"approve-super"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Pemesanan Tiket & Pembayaran",
+			"item": [
+				{
+					"name": "Pesan Tiket (Create Transaksi)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wisata_id\": 1,\n    \"jumlah_tiket\": 2,\n    \"tanggal_kunjungan\": \"2026-06-25\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tiket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tiket"
+							]
+						},
+						"description": "Membuat order tiket baru. Response akan mengembalikan detail transaksi beserta `snap_token` Midtrans untuk pembayaran di webview/client."
+					},
+					"response": []
+				},
+				{
+					"name": "Riwayat Tiket User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tiket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tiket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Simulasi Webhook Callback Midtrans",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"TKT-1716123456\", \n    \"transaction_status\": \"settlement\",\n    \"gross_amount\": \"80000.00\",\n    \"payment_type\": \"qris\",\n    \"signature_key\": \"SESUAIKAN_SIGNATURE_KEY_JIKA_VALIDASI_AKTIF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payment/callback",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment",
+								"callback"
+							]
+						},
+						"description": "Menguji webhook penerimaan notifikasi Midtrans. Silakan ganti order_id dengan ID tiket real berstatus pending untuk simulasi sukses pembayaran (settlement)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Rekomendasi & Ulasan",
+			"item": [
+				{
+					"name": "Beri Ulasan & Rating",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "wisata_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "rating",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "ulasan",
+									"value": "Tempatnya sangat asri dan sejuk sekali! Cocok untuk berlibur bersama keluarga.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/rekomendasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekomendasi"
+							]
+						},
+						"description": "Kirim rating dan review untuk objek wisata. Hanya diperbolehkan untuk user yang sudah pernah memesan & membayar tiket di objek wisata tersebut."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Ticket Validation",
+			"item": [
+				{
+					"name": "Validasi Tiket (QR Scan)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kode_tiket\": \"TKT-1716123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/validasi-tiket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"validasi-tiket"
+							]
+						},
+						"description": "Menerima kode QR tiket dari scanner Android Pengelola, memvalidasi apakah valid, berstatus PAID, belum pernah digunakan, dan diperuntukkan bagi lokasi wisata yang dikelola."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -32,6 +32,15 @@ class WisataForm
                     ->required()
                     ->numeric()
                     ->prefix('Rp'),
+                Select::make('kategori')
+                    ->options([
+                        'Alam' => 'Alam',
+                        'Budaya' => 'Budaya',
+                        'Rekreasi' => 'Rekreasi',
+                        'Edukasi' => 'Edukasi',
+                    ])
+                    ->default('Alam')
+                    ->required(),
                 Select::make('id_pengelola')
                     ->label('Pengelola')
                     ->relationship('pengelola', 'name')

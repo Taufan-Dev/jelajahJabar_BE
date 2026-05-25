@@ -24,6 +24,11 @@ class WisataController extends Controller
             $query->where('id_wilayah', $request->id_wilayah);
         }
 
+        // Filter berdasarkan Kategori jika ada
+        if ($request->has('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
         // Cari berdasarkan nama wisata
         if ($request->has('search')) {
             $query->where('nama_wisata', 'like', '%' . $request->search . '%');
@@ -87,6 +92,7 @@ class WisataController extends Controller
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string',
             'harga_tiket' => 'required|numeric|min:0',
+            'kategori' => 'required|in:Alam,Budaya,Rekreasi,Edukasi',
             'id_wilayah' => 'required|exists:wilayahs,id',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -105,6 +111,7 @@ class WisataController extends Controller
             'deskripsi' => $request->deskripsi,
             'lokasi' => $request->lokasi,
             'harga_tiket' => $request->harga_tiket,
+            'kategori' => $request->kategori,
             'id_pengelola' => $request->user()->id,
             'id_wilayah' => $request->id_wilayah,
             'gambar' => $gambarPath,
@@ -142,6 +149,7 @@ class WisataController extends Controller
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string',
             'harga_tiket' => 'required|numeric|min:0',
+            'kategori' => 'required|in:Alam,Budaya,Rekreasi,Edukasi',
             'id_wilayah' => 'required|exists:wilayahs,id',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -159,6 +167,7 @@ class WisataController extends Controller
         $wisata->deskripsi = $request->deskripsi;
         $wisata->lokasi = $request->lokasi;
         $wisata->harga_tiket = $request->harga_tiket;
+        $wisata->kategori = $request->kategori;
         $wisata->id_wilayah = $request->id_wilayah;
         
         // Setiap kali data diubah oleh pengelola, kembalikan status menjadi pending agar ditinjau ulang

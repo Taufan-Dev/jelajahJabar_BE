@@ -19,5 +19,7 @@ class AppServiceProvider extends ServiceProvider
         if (request()->header('X-Forwarded-Proto') === 'https') {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading(! $this->app->isProduction());
     }
 }

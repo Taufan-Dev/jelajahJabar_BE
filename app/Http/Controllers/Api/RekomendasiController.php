@@ -40,15 +40,21 @@ class RekomendasiController extends Controller
             ], 403);
         }
 
-        // Cek apakah user sudah pernah memberi ulasan untuk wisata ini sebelumnya
-        $existingReview = Rekomendasi::where('user_id', $user->id)
+        // Cek jumlah tiket lunas (paid) yang dibeli user untuk wisata ini
+        $totalPaidTickets = Tiket::where('user_id', $user->id)
             ->where('wisata_id', $request->wisata_id)
-            ->first();
+            ->where('status_pembayaran', 'paid')
+            ->count();
 
-        if ($existingReview) {
+        // Cek jumlah ulasan yang sudah dikirim oleh user untuk wisata ini
+        $totalReviewsSubmitted = Rekomendasi::where('user_id', $user->id)
+            ->where('wisata_id', $request->wisata_id)
+            ->count();
+
+        if ($totalReviewsSubmitted >= $totalPaidTickets) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Anda sudah pernah memberikan ulasan untuk tempat wisata ini.'
+                'message' => 'Jumlah ulasan Anda tidak boleh melebihi jumlah tiket lunas yang telah Anda beli untuk wisata ini.'
             ], 400);
         }
 

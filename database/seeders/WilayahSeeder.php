@@ -21,6 +21,7 @@ class WilayahSeeder extends Seeder
             ['nama_kabupaten' => 'Kabupaten Bogor'],
             ['nama_kabupaten' => 'Kota Bogor'],
             ['nama_kabupaten' => 'Kabupaten Kuningan'],
+            ['nama_kabupaten' => 'Kota Cirebon'],
         ];
 
         foreach ($wilayahs as $wilayah) {

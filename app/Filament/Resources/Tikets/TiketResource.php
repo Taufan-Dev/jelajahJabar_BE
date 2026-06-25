@@ -41,7 +41,7 @@ class TiketResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['user', 'wisata']);
         $user = auth()->user();
 
         if ($user->role === 'pengelola') {

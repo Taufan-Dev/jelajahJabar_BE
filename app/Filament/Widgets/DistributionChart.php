@@ -12,6 +12,11 @@ class DistributionChart extends ChartWidget
 
     protected static ?int $sort = 3;
 
+    protected function getPollingInterval(): ?string
+    {
+        return '5s';
+    }
+
     protected int | string | array $columnSpan = [
         'md' => 1,
         'xl' => 1,

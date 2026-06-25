@@ -19,6 +19,7 @@ class WisataForm
                 FileUpload::make('gambar')
                     ->label('Gambar Utama Wisata')
                     ->image()
+                    ->multiple()
                     ->directory('wisata-images')
                     ->maxSize(5120) // 5MB
                     ->nullable(),

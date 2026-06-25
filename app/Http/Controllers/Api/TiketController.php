@@ -65,7 +65,7 @@ class TiketController extends Controller
             'jumlah_tiket' => $request->jumlah_tiket,
             'total_harga' => $totalHarga,
             'status_pembayaran' => 'pending',
-            'status_tiket' => 'active',
+            'status_tiket' => 'unused',
             'tanggal_kunjungan' => $request->tanggal_kunjungan,
         ]);
 
@@ -92,6 +92,9 @@ class TiketController extends Controller
                     'quantity' => (int) $request->jumlah_tiket,
                     'name' => 'Tiket ' . $wisata->nama_wisata,
                 ]
+            ],
+            'callbacks' => [
+                'finish' => route('payment.success')
             ]
         ];
 
@@ -129,7 +132,7 @@ class TiketController extends Controller
             $orderId = $notification->order_id; // Ini kode_tiket kita
             $paymentType = $notification->payment_type;
 
-            $tiket = Tiket::where('kode_tiket', $orderId)->first();
+            $tiket = Tiket::where('kode_tiket', $orderId)->with(['user', 'wisata'])->first();
 
             if (!$tiket) {
                 return response()->json([
@@ -144,32 +147,42 @@ class TiketController extends Controller
                     'status_pembayaran' => 'paid',
                 ]);
 
-                // KIRIM EMAIL & GENERATE PDF TIKET SECARA REAL-TIME
-                try {
-                    $user = $tiket->user;
-                    $wisata = $tiket->wisata;
+                // KIRIM EMAIL & GENERATE PDF TIKET SECARA REAL-TIME (DEFERRED)
+                defer(function () use ($tiket) {
+                    try {
+                        $user = $tiket->user;
+                        $wisata = $tiket->wisata;
 
-                    // Generate file PDF
-                    $pdf = Pdf::loadView('reports.ticket-pdf', [
-                        'tiket' => $tiket,
-                        'wisata' => $wisata,
-                        'user' => $user,
-                    ]);
+                        // Generate file PDF
+                        $pdf = Pdf::loadView('reports.ticket-pdf', [
+                            'tiket' => $tiket,
+                            'wisata' => $wisata,
+                            'user' => $user,
+                        ]);
 
-                    // Simpan sementara atau langsung kirim sebagai attachment
-                    Mail::send([], [], function ($message) use ($user, $tiket, $pdf) {
-                        $message->to($user->email)
-                            ->subject('E-Tiket Jelajah Jabar - ' . $tiket->wisata->nama_wisata)
-                            ->html("<p>Halo <strong>{$user->name}</strong>,</p><p>Pembayaran Anda berhasil! Berikut kami lampirkan E-Tiket PDF beserta QR Code Anda.</p><p>Terima kasih,<br><strong>Tim Jelajah Jabar</strong></p>")
-                            ->attachData($pdf->output(), 'e-tiket-' . $tiket->kode_tiket . '.pdf', [
-                                'mime' => 'application/pdf',
-                            ]);
-                    });
+                        // Render beautiful HTML email template
+                        $htmlContent = view('emails.ticket', [
+                            'user' => $user,
+                            'tiket' => $tiket,
+                            'wisata' => $wisata,
+                            'isSimulasi' => false
+                        ])->render();
 
-                    Log::info("Email tiket {$tiket->kode_tiket} berhasil dikirim ke {$user->email}");
-                } catch (\Exception $mailEx) {
-                    Log::warning("Gagal mengirim email tiket {$tiket->kode_tiket}: " . $mailEx->getMessage());
-                }
+                        // Simpan sementara atau langsung kirim sebagai attachment
+                        Mail::send([], [], function ($message) use ($user, $tiket, $pdf, $htmlContent) {
+                            $message->to($user->email)
+                                ->subject('E-Tiket Jelajah Jabar - ' . $tiket->wisata->nama_wisata)
+                                ->html($htmlContent)
+                                ->attachData($pdf->output(), 'e-tiket-' . $tiket->kode_tiket . '.pdf', [
+                                    'mime' => 'application/pdf',
+                                ]);
+                        });
+
+                        Log::info("Email tiket {$tiket->kode_tiket} berhasil dikirim ke {$user->email}");
+                    } catch (\Exception $mailEx) {
+                        Log::warning("Gagal mengirim email tiket {$tiket->kode_tiket}: " . $mailEx->getMessage());
+                    }
+                });
 
             } elseif ($transactionStatus == 'pending') {
                 $tiket->update([
@@ -194,5 +207,89 @@ class TiketController extends Controller
                 'message' => 'Callback error: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function qrCode($kodeTiket)
+    {
+        $tiket = Tiket::where('kode_tiket', $kodeTiket)->first();
+
+        if (!$tiket) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tiket tidak ditemukan'
+            ], 404);
+        }
+
+        return response(QrCode::size(300)->margin(1)->generate($tiket->kode_tiket))
+            ->header('Content-Type', 'image/svg+xml');
+    }
+
+    public function simulateCallback(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'kode_tiket' => 'required|exists:tikets,kode_tiket',
+            'status' => 'nullable|in:settlement,pending,failed'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $tiket = Tiket::where('kode_tiket', $request->kode_tiket)->with(['user', 'wisata'])->first();
+        $status = $request->input('status', 'settlement');
+
+        if ($status === 'settlement') {
+            $tiket->update([
+                'status_pembayaran' => 'paid',
+            ]);
+
+            defer(function () use ($tiket) {
+                try {
+                    $user = $tiket->user;
+                    $wisata = $tiket->wisata;
+
+                    $pdf = Pdf::loadView('reports.ticket-pdf', [
+                        'tiket' => $tiket,
+                        'wisata' => $wisata,
+                        'user' => $user,
+                    ]);
+
+                    // Render beautiful HTML email template
+                    $htmlContent = view('emails.ticket', [
+                        'user' => $user,
+                        'tiket' => $tiket,
+                        'wisata' => $wisata,
+                        'isSimulasi' => true
+                    ])->render();
+
+                    Mail::send([], [], function ($message) use ($user, $tiket, $pdf, $htmlContent) {
+                        $message->to($user->email)
+                            ->subject('E-Tiket Jelajah Jabar - ' . $tiket->wisata->nama_wisata . ' (Simulasi)')
+                            ->html($htmlContent)
+                            ->attachData($pdf->output(), 'e-tiket-' . $tiket->kode_tiket . '.pdf', [
+                                'mime' => 'application/pdf',
+                            ]);
+                    });
+
+                    Log::info("Email tiket {$tiket->kode_tiket} berhasil disimulasikan ke {$user->email}");
+                } catch (\Exception $mailEx) {
+                    Log::warning("Gagal mengirim email tiket simulasian {$tiket->kode_tiket}: " . $mailEx->getMessage());
+                }
+            });
+        } elseif ($status === 'pending') {
+            $tiket->update([
+                'status_pembayaran' => 'pending',
+            ]);
+        } else {
+            $tiket->update([
+                'status_pembayaran' => 'failed',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Simulasi callback Midtrans berhasil diproses',
+            'data' => $tiket->fresh()
+        ]);
     }
 }

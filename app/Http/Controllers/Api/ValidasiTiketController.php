@@ -31,7 +31,7 @@ class ValidasiTiketController extends Controller
         }
 
         // Cari tiket beserta detail wisata tujuannya
-        $tiket = Tiket::where('kode_tiket', $request->kode_tiket)->with('wisata')->first();
+        $tiket = Tiket::where('kode_tiket', $request->kode_tiket)->with(['wisata', 'user'])->first();
 
         if (!$tiket) {
             return response()->json([

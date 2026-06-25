@@ -22,9 +22,14 @@ Route::post('/login', [AuthController::class, 'login']);
 // Katalog Wisata (Umum / Guest)
 Route::get('/wisata', [WisataController::class, 'index']);
 Route::get('/wisata/{id}', [WisataController::class, 'show']);
+Route::get('/kategori', [WisataController::class, 'categories']);
 
-// Callback Midtrans (Public Webhook)
+// Callback Midtrans (Public Webhook & Simulator)
 Route::post('/payment/callback', [TiketController::class, 'callback']);
+Route::post('/payment/simulate-callback', [TiketController::class, 'simulateCallback']);
+
+// QR Code Tiket (Public untuk mempermudah image loading di Android)
+Route::get('/tiket/{kode_tiket}/qrcode', [TiketController::class, 'qrCode']);
 
 /*
 |--------------------------------------------------------------------------

@@ -69,6 +69,16 @@ class WisataController extends Controller
         ]);
     }
 
+    public function categories()
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Daftar kategori wisata berhasil diambil',
+            'data' => Wisata::KATEGORI
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         if ($request->user()->role !== 'pengelola') {
@@ -92,18 +102,21 @@ class WisataController extends Controller
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string',
             'harga_tiket' => 'required|numeric|min:0',
-            'kategori' => 'required|in:Alam,Budaya,Rekreasi,Edukasi',
+            'kategori' => 'required|in:' . implode(',', Wisata::KATEGORI),
             'id_wilayah' => 'required|exists:wilayahs,id',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => 'nullable|array',
+            'gambar.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
 
-        $gambarPath = null;
+        $gambarPaths = [];
         if ($request->hasFile('gambar')) {
-            $gambarPath = $request->file('gambar')->store('wisata', 'public');
+            foreach ($request->file('gambar') as $file) {
+                $gambarPaths[] = $file->store('wisata', 'public');
+            }
         }
 
         $wisata = Wisata::create([
@@ -114,7 +127,7 @@ class WisataController extends Controller
             'kategori' => $request->kategori,
             'id_pengelola' => $request->user()->id,
             'id_wilayah' => $request->id_wilayah,
-            'gambar' => $gambarPath,
+            'gambar' => $gambarPaths,
             'status' => 'pending',
         ]);
 
@@ -149,9 +162,10 @@ class WisataController extends Controller
             'deskripsi' => 'required|string',
             'lokasi' => 'required|string',
             'harga_tiket' => 'required|numeric|min:0',
-            'kategori' => 'required|in:Alam,Budaya,Rekreasi,Edukasi',
+            'kategori' => 'required|in:' . implode(',', Wisata::KATEGORI),
             'id_wilayah' => 'required|exists:wilayahs,id',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => 'nullable|array',
+            'gambar.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -159,8 +173,11 @@ class WisataController extends Controller
         }
 
         if ($request->hasFile('gambar')) {
-            $gambarPath = $request->file('gambar')->store('wisata', 'public');
-            $wisata->gambar = $gambarPath;
+            $gambarPaths = [];
+            foreach ($request->file('gambar') as $file) {
+                $gambarPaths[] = $file->store('wisata', 'public');
+            }
+            $wisata->gambar = $gambarPaths;
         }
 
         $wisata->nama_wisata = $request->nama_wisata;

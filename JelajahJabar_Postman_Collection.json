@@ -177,9 +177,53 @@
 							],
 							"path": [
 								"wisata"
+							],
+							"query": [
+								{
+									"key": "kategori",
+									"value": "Alam",
+									"description": "Filter berdasarkan kategori (Alam, Budaya, Rekreasi, Edukasi)",
+									"disabled": true
+								},
+								{
+									"key": "id_wilayah",
+									"value": "1",
+									"description": "Filter berdasarkan ID Wilayah",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "Kawah",
+									"description": "Cari berdasarkan nama wisata",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Mengambil seluruh data wisata yang sudah diapprove Super Admin, diurutkan berdasarkan formula rekomendasi (jumlah tiket terjual & rating)."
+					},
+					"response": []
+				},
+				{
+					"name": "Daftar Kategori Wisata",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/kategori",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"kategori"
+							]
+						},
+						"description": "Mengambil daftar kategori wisata yang tersedia (Alam, Budaya, Rekreasi, Edukasi)"
 					},
 					"response": []
 				},
@@ -507,6 +551,66 @@
 							]
 						},
 						"description": "Menguji webhook penerimaan notifikasi Midtrans. Silakan ganti order_id dengan ID tiket real berstatus pending untuk simulasi sukses pembayaran (settlement)."
+					},
+					"response": []
+				},
+				{
+					"name": "Simulasi Callback Cepat (Tanpa Midtrans SDK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kode_tiket\": \"TIK-XXXXXX\",\n    \"status\": \"settlement\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payment/simulate-callback",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payment",
+								"simulate-callback"
+							]
+						},
+						"description": "Mensimulasikan pembayaran tiket secara lokal secara cepat tanpa memerlukan payload Midtrans SDK asli. Status bisa diisi: settlement (sukses), pending, failed."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tiket QR Code (SVG)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "image/svg+xml",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tiket/TIK-XXXXXX/qrcode",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tiket",
+								"TIK-XXXXXX",
+								"qrcode"
+							]
+						},
+						"description": "Mengambil gambar QR Code tiket secara langsung sebagai SVG untuk mempermudah render di aplikasi Android atau browser."
 					},
 					"response": []
 				}

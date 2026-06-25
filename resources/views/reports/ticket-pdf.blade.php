@@ -16,7 +16,7 @@
         .ticket-card {
             background-color: #ffffff;
             border-radius: 12px;
-            border: 1px dashed #00bc7d;
+            border: 1px dashed #4F46E5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             max-width: 500px;
             margin: 0 auto;
@@ -24,7 +24,7 @@
             position: relative;
         }
         .ticket-header {
-            background-color: #00bc7d;
+            background-color: #4F46E5;
             color: #ffffff;
             padding: 20px;
             text-align: center;
@@ -86,7 +86,7 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             font-weight: bold;
-            color: #00bc7d;
+            color: #4F46E5;
             margin-top: 10px;
             letter-spacing: 2px;
         }
@@ -154,11 +154,7 @@
 
             <div class="qr-section">
                 <div class="qr-code">
-                    @php
-                        // Memanfaatkan Simple QRCode untuk mengubah output PNG menjadi base64 sehingga aman terlampir di PDF offline
-                        $qrcode = base64_encode(QrCode::format('png')->size(140)->margin(0)->generate($tiket->kode_tiket));
-                    @endphp
-                    <img src="data:image/png;base64, {!! $qrcode !!}" alt="QR Code Validasi">
+                    {!! QrCode::size(140)->margin(0)->generate($tiket->kode_tiket) !!}
                 </div>
                 <div class="ticket-code">{{ $tiket->kode_tiket }}</div>
                 <p style="font-size: 9px; color: #9ca3af; margin: 5px 0 0 0;">Tunjukkan QR Code ini pada petugas di pintu masuk wisata untuk di-scan.</p>

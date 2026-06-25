@@ -11,6 +11,12 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsOverview extends BaseWidget
 {
     protected static ?int $sort = 1;
+
+    protected function getPollingInterval(): ?string
+    {
+        return '5s';
+    }
+
     protected function getStats(): array
     {
         $user = auth()->user();

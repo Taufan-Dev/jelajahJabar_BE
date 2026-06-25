@@ -68,6 +68,20 @@ class UserSeeder extends Seeder
             'role' => 'pengelola',
         ]);
 
+        User::create([
+            'name' => 'Pengelola Waterland',
+            'email' => 'waterland@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 'pengelola',
+        ]);
+
+        User::create([
+            'name' => 'Pengelola Kebun Raya',
+            'email' => 'kebunraya@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 'pengelola',
+        ]);
+
         // 4. User Biasa (Pengunjung)
         User::create([
             'name' => 'User Pengunjung',

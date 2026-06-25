@@ -41,7 +41,7 @@ class LogValidasiResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['tiket.user', 'tiket.wisata', 'validator']);
         $user = auth()->user();
 
         if ($user->role === 'pengelola') {

@@ -102,12 +102,13 @@ Semua request wajib menyertakan header `Accept: application/json`. Endpoint terp
 
 ### 2. Katalog Wisata & Rekomendasi (Fase 2)
 
+- **GET** `/api/kategori` | Mengambil daftar semua kategori wisata yang tersedia (Alam, Budaya, Rekreasi, Edukasi).
 - **GET** `/api/wisata` | Mengambil katalog wisata aktif.
-    - _Parameter Opsional_: `id_wilayah`, `search` (cari nama wisata)
+    - _Parameter Opsional_: `id_wilayah`, `kategori`, `search` (cari nama wisata)
     - _Algoritma_: Otomatis mengurutkan rekomendasi dari **Tiket Terjual Terbanyak** & **Rata-rata Rating Bintang Tertinggi**.
 - **GET** `/api/wisata/{id}` | Mengambil detail destinasi wisata beserta kompilasi review pengunjung.
 - **POST** `/api/wisata` | Pengelola mendaftarkan wisata baru (Status awal: pending). _(Terproteksi - Pengelola)_
-    - _Body_: `nama_wisata`, `deskripsi`, `lokasi`, `harga_tiket`, `id_wilayah`, `gambar` (File Foto)
+    - _Body_: `nama_wisata`, `deskripsi`, `lokasi`, `harga_tiket`, `kategori`, `id_wilayah`, `gambar` (File Foto)
 - **POST** `/api/wisata/{id}` | Memperbarui wisata. Status otomatis kembali _pending_ jika diubah. _(Terproteksi - Pengelola)_
     - _Body_: Sama seperti store (mendukung unggahan gambar baru)
 
@@ -123,6 +124,8 @@ Semua request wajib menyertakan header `Accept: application/json`. Endpoint terp
     - _Respons_: Mengembalikan detail tiket lengkap beserta **`snap_token`** untuk pembayaran di mobile.
 - **GET** `/api/tiket` | Mengambil riwayat pembelian tiket user bersangkutan. _(Terproteksi - User)_
 - **POST** `/api/payment/callback` | Webhook publik menerima status bayar dari Midtrans. Otomatis melunasi tiket, membuat QR-Code, dan mengirimkan file PDF Tiket ke email pembeli. _(Umum)_
+- **POST** `/api/payment/simulate-callback` | Menguji/mensimulasikan penerimaan callback pembayaran Midtrans secara lokal (tanpa Ngrok). _(Umum)_
+    - _Body_: `kode_tiket`, `status` (default: `settlement`)
 
 ### 5. Rating & Ulasan (Feedback)
 
@@ -132,6 +135,7 @@ Semua request wajib menyertakan header `Accept: application/json`. Endpoint terp
 
 ### 6. Pintu Masuk / Validasi QR-Code
 
+- **GET** `/api/tiket/{kode_tiket}/qrcode` | Mengambil gambar QR Code tiket berformat SVG secara langsung untuk mempermudah render di mobile. _(Umum)_
 - **POST** `/api/validasi-tiket` | Scan QR-Code masuk oleh petugas pintu gerbang wisata. _(Terproteksi - Pengelola)_
     - _Body_: `kode_tiket`
     - _Keamanan_: Tiket hanya dapat di-scan 1 kali. Scan kedua kalinya akan ditolak dan menampilkan info waktu/tanggal penggunaan pertamanya demi mencegah duplikasi.

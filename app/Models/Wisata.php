@@ -8,6 +8,15 @@ class Wisata extends Model
 {
     protected $guarded = [];
 
+    const KATEGORI = ['Alam', 'Budaya', 'Rekreasi', 'Edukasi'];
+
+    protected function casts(): array
+    {
+        return [
+            'gambar' => 'array',
+        ];
+    }
+
     protected static function booted()
     {
         static::updated(function ($wisata) {

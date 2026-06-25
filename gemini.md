@@ -264,6 +264,7 @@ POST /api/logout
 ## Wisata
 GET /api/wisata
 GET /api/wisata/{id}
+GET /api/kategori
 POST /api/wisata
 PUT /api/wisata/{id}
 
@@ -274,10 +275,12 @@ POST /api/wisata/{id}/approve-super
 ## Tiket
 POST /api/tiket
 GET /api/tiket
+GET /api/tiket/{kode_tiket}/qrcode
 
 ## Payment
 POST /api/payment
 POST /api/payment/callback
+POST /api/payment/simulate-callback
 
 ## Review
 POST /api/rekomendasi
